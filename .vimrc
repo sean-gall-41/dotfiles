@@ -18,11 +18,21 @@ call plug#begin('~/.vim/plugged')
 "load fzf (fuzzy file-finder)
 Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 
-"load Pear Tree (auto-pair plugin: https://github.com/tmsvg/pear-tree)
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+
+Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+" load Pear Tree (auto-pair plugin: https://github.com/tmsvg/pear-tree)
 Plug 'tmsvg/pear-tree'
 " Initialize plugin system
 call plug#end()
+
+let g:UltiSnipsExpandTrigger="<space>"
+let g:UltiSnipsEditSplit="vertical"
+let g:UltiSnipsJumpForwardTrigger="<c-b>"
+let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 
 " always display the status line
 set laststatus=2
@@ -34,6 +44,9 @@ colorscheme slate
 
 " Turn syntax highlighting on.
 syntax on
+
+" indicate tab indentation with '|'
+set list lcs=tab:\|\ 
 
 " Add numbers to each line on the left-hand side
 set number
@@ -66,6 +79,10 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 
+" add new line without entering insert mode
+nnoremap o o<Esc>
+nnoremap O O<Esc>
+
 " switch ESC to TAB for easier escaping from various places
 nnoremap <Tab> <Esc> 
 vnoremap <Tab> <Esc>gV
@@ -73,6 +90,12 @@ onoremap <Tab> <Esc>
 cnoremap <Tab> <C-C><Esc>
 inoremap <Tab> <Esc>`^
 inoremap <Leader><Tab> <Tab>
+
+" remap fzf invocation to something more convenient
+nnoremap <silent> <C-f> :Files<CR>
+
+" remap finding buffers
+nnoremap <silent> <C-g> :Buffer<CR>
 
 " Set behaviour of '<<' '>>' and '=='
 set shiftwidth=4
@@ -90,3 +113,19 @@ set nowrap
 " 'easier' key combos 'ctrl+c' and 'ctrl+v'
 vnoremap <C-c> "*y :let @+=@*<CR>
 map <C-p> "+P
+
+" remap sourcing vimrc for convenience
+nmap <silent> <leader>sv :so $MYVIMRC<CR>
+
+set viminfo+=n~/.vim/viminfo
+
+" automatically create header guards for c/c++ headers
+function! s:insert_gates()
+	let gatename = substitute(toupper(expand("%:t")), "\\.", "_", "g")
+	execute "normal! i#ifndef " . gatename . "_"
+ 	execute "normal! o#define " . gatename . "_"
+	execute "normal! Go#endif /* " . gatename . "_ */"
+	normal! kk
+endfunction
+autocmd BufNewFile *.{h,hpp} call <SID>insert_gates()
+
